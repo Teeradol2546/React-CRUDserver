@@ -1,66 +1,84 @@
-// Code for List all the books in the library
-// with the option to view, update and delete  a book
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-
 import PopupForm from "./PopupForm";
 
 export default function BookList() {
   const [books, setBooks] = useState([]);
-  const [book, setBook] = useState({ id: "", title: "", author: "" });
-
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [formData, setFormData] = useState([]);
-
-  const handleOpenPopup = () => setIsPopupOpen(true);
-  const handleClosePopup = () => setIsPopupOpen(false);
-
-  const handleFormSubmit = (data) => {
-    if (data.id) {
-      // Update existing data
-      setFormData(formData.map(item => item.id === data.id ? data : item));
-    } else {
-      // Add new data with a unique id
-      setFormData([...formData, { ...data, id: Date.now() }]);
-    }
-    console.log(formData); // You can replace this with any action
-    handleClosePopup();
-  };
+  const [bookToUpdate, setBookToUpdate] = useState(null);
 
   useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const fetchBooks = () => {
     axios
       .get("https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books")
       .then((response) => {
         setBooks(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching books:", error);
       });
-  }, []);
-
-  const viewBook = (id) => {
-    axios
-      .get(`https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books/${id}`)
-      .then((response) => {
-        setBook(response.data);
-      });
-    alert("Book Title: " + book.title + "\n" + "Book Author: " + book.author);
   };
 
-  const updateBook = (book) => {
-    console.log("upDFunc: ", book);
-    console.log("upDFunc: ", editingData);
-     axios
-       .put(`https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books/${id}`)
-       .then((response) => {
-         setBook(response.data);
-       });
+  const viewBook = (id) => {
+    const selectedBook = books.find((book) => book.id === id);
+    if (selectedBook) {
+      alert(
+        "Book Title: " + selectedBook.title + "\n" + "Book Author: " + selectedBook.author
+      );
+    }
   };
 
   const deleteBook = (id) => {
     axios
-      .delete(`https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books${id}`)
+      .delete(`https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books/${id}`)
       .then(() => {
         setBooks(books.filter((book) => book.id !== id));
+      })
+      .catch((error) => {
+        console.error("Error deleting book:", error);
       });
+  };
+
+  const handleOpenPopup = () => setIsPopupOpen(true);
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+    setBookToUpdate(null);
+  };
+
+  const handleUpdateBook = (book) => {
+    setBookToUpdate(book);
+    handleOpenPopup();
+  };
+
+  const handleFormSubmit = (data) => {
+    if (bookToUpdate) {
+      // Update existing data
+      axios
+        .put(
+          `https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books/${bookToUpdate.id}`,
+          data
+        )
+        .then(() => {
+          fetchBooks();
+        })
+        .catch((error) => {
+          console.error("Error updating book:", error);
+        });
+    } else {
+      // Add new data with a unique id
+      axios
+        .post("https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books", data)
+        .then(() => {
+          fetchBooks();
+        })
+        .catch((error) => {
+          console.error("Error adding book:", error);
+        });
+    }
+    handleClosePopup();
   };
 
   return (
@@ -81,7 +99,7 @@ export default function BookList() {
               <td>{book.author}</td>
               <td>
                 <button onClick={() => viewBook(book.id)}>View</button>
-                <button onClick={() => updateBook(book)}>Update</button>
+                <button onClick={() => handleUpdateBook(book)}>Update</button>
                 <button onClick={() => deleteBook(book.id)}>Delete</button>
               </td>
             </tr>
@@ -94,8 +112,8 @@ export default function BookList() {
           isOpen={isPopupOpen}
           onClose={handleClosePopup}
           onSubmit={handleFormSubmit}
+          initialData={bookToUpdate}
         />
-        {/* Render submitted data or other components here */}
       </div>
     </div>
   );

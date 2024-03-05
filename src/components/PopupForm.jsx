@@ -1,25 +1,23 @@
-import PropsType from "prop-types";
-
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useState } from "react";
+import PropTypes from "prop-types";
 
-export default function PopupForm({ isOpen, onClose, onSubmit}) {
-  const [author, setAuthor] = useState( "");
+export default function PopupForm({ isOpen, onClose, onSubmit, initialData }) {
+  const [author, setAuthor] = useState("");
   const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    if (initialData) {
+      setAuthor(initialData.author);
+      setTitle(initialData.title);
+    }
+  }, [initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ author, title });
-    onClose(); // Close the pop-up after submitting
-    axios
-      .post("https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books", {
-        author: author,
-        title: title
-      })
-      .then((response) => {
-        console.log(response);
-      });
-
+    const data = { author, title };
+    onSubmit(data);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -63,10 +61,8 @@ export default function PopupForm({ isOpen, onClose, onSubmit}) {
 }
 
 PopupForm.propTypes = {
-
-  isOpen: PropsType.bool.isRequired,
-  onClose: PropsType.func.isRequired,
-  onSubmit: PropsType.func.isRequired,
-  initialData: PropsType.object, // The initial data to be displayed in the form
-
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  initialData: PropTypes.object,
 };
