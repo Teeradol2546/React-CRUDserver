@@ -30,7 +30,7 @@ export default function BookList() {
 
   useEffect(() => {
     axios
-      .get("https://node41091-noderest.proen.app.ruk-com.cloud/books")
+      .get("https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books")
       .then((response) => {
         setBooks(response.data);
       });
@@ -38,7 +38,7 @@ export default function BookList() {
 
   const viewBook = (id) => {
     axios
-      .get(`https://node41091-noderest.proen.app.ruk-com.cloud/books/${id}`)
+      .get(`https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books/${id}`)
       .then((response) => {
         setBook(response.data);
       });
@@ -48,16 +48,16 @@ export default function BookList() {
   const updateBook = (book) => {
     console.log("upDFunc: ", book);
     console.log("upDFunc: ", editingData);
-    // axios
-    //   .put(`https://node41091-noderest.proen.app.ruk-com.cloud/books/${id}`)
-    //   .then((response) => {
-    //     setBook(response.data);
-    //   });
+     axios
+       .put(`https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books/${id}`)
+       .then((response) => {
+         setBook(response.data);
+       });
   };
 
   const deleteBook = (id) => {
     axios
-      .delete(`https://node41091-noderest.proen.app.ruk-com.cloud/books/${id}`)
+      .delete(`https://node56763-teeradolnoderest.proen.app.ruk-com.cloud/books${id}`)
       .then(() => {
         setBooks(books.filter((book) => book.id !== id));
       });
